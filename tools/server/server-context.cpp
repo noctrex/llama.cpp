@@ -1106,6 +1106,11 @@ private:
             return false;
         }
 
+        if (llama_model_is_prefix_lm(model_tgt) && params_base.cache_prompt) {
+            SRV_WRN("%s", "prefix-LM model: prompt caching disabled, a cached prompt prefix would have been computed without the tokens that follow it\n");
+            params_base.cache_prompt = false;
+        }
+
         if (ctx_tgt == nullptr) {
             SRV_ERR("failed to create_context with model '%s'\n", params_base.model.path.c_str());
             return false;
@@ -1694,6 +1699,11 @@ private:
     }
 
     bool launch_slot_with_task(server_slot & slot, server_task && task) {
+        // prefix-LM models: the whole prompt is recomputed for every request
+        if (task.params.cache_prompt && llama_model_is_prefix_lm(model_tgt)) {
+            task.params.cache_prompt = false;
+        }
+
         // process per-request lora adapters
         if (!task.params.lora.empty()) {
             auto task_loras = construct_lora_list(task.params.lora);
