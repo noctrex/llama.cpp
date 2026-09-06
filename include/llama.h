@@ -665,6 +665,11 @@ extern "C" {
     // Returns true if the model is diffusion-based (like LLaDA, Dream, etc.)
     LLAMA_API bool llama_model_is_diffusion(const struct llama_model * model);
 
+    // Returns true if the model is a prefix LM: prompt tokens attend to each other in both
+    // directions and only generated tokens are causal (like hrm-text with prefix_lm set).
+    // Prompts must be processed in a single ubatch and cached prompt prefixes must not be reused.
+    LLAMA_API bool llama_model_is_prefix_lm(const struct llama_model * model);
+
     // Returns 0 on success
     LLAMA_API uint32_t llama_model_quantize(
             const char * fname_inp,
