@@ -74,21 +74,7 @@ class HrmTextModel(TextModel):
             gate, up = data_torch.chunk(2, dim=0)
             yield self.format_tensor_name(gguf.MODEL_TENSOR.FFN_GATE, layer_idx), gate.contiguous()
             yield self.format_tensor_name(gguf.MODEL_TENSOR.FFN_UP, layer_idx), up.contiguous()
-        elif tensor_name in ("self_attn.q_proj.weight", "self_attn.k_proj.weight", "self_attn.v_proj.weight",
-                             "self_attn.gate_proj.weight", "self_attn.o_proj.weight",
-                             "mlp.gate_proj.weight", "mlp.up_proj.weight", "mlp.down_proj.weight"):
-            tensor = {
-                "self_attn.q_proj.weight": gguf.MODEL_TENSOR.ATTN_Q,
-                "self_attn.k_proj.weight": gguf.MODEL_TENSOR.ATTN_K,
-                "self_attn.v_proj.weight": gguf.MODEL_TENSOR.ATTN_V,
-                "self_attn.gate_proj.weight": gguf.MODEL_TENSOR.ATTN_GATE,
-                "self_attn.o_proj.weight": gguf.MODEL_TENSOR.ATTN_OUT,
-                "mlp.gate_proj.weight": gguf.MODEL_TENSOR.FFN_GATE,
-                "mlp.up_proj.weight": gguf.MODEL_TENSOR.FFN_UP,
-                "mlp.down_proj.weight": gguf.MODEL_TENSOR.FFN_DOWN,
-            }[tensor_name]
-            yield self.format_tensor_name(tensor, layer_idx), data_torch
-        elif tensor_name == "attn.o_proj.weight":
-            yield self.format_tensor_name(gguf.MODEL_TENSOR.ATTN_OUT, layer_idx), data_torch
         else:
-            raise ValueError(f"can not map tensor: {name}")
+            if tensor_name.startswith("attn."):
+                tensor_name = "self_attn." + tensor_name[len("attn."):]
+            yield from super().modify_tensors(data_torch, f"model.layers.{layer_idx}.{tensor_name}", layer_idx)
