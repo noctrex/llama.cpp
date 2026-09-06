@@ -31,11 +31,6 @@ class HrmTextModel(TextModel):
         self.block_count = self.layers_per_stack * self.h_cycles * (self.l_cycles + 1)
         self.tensor_map = gguf.get_tensor_name_map(self.model_arch, 2 * self.layers_per_stack)
 
-        # "default" rope_type carries no scaling; drop it to avoid a misleading
-        # unknown-rope-type warning in the generic parameter writer
-        if self.rope_parameters.get("rope_type") == "default":
-            self.rope_parameters = {k: v for k, v in self.rope_parameters.items() if k != "rope_type"}
-
     def set_vocab(self):
         self._set_vocab_gpt2()
 
