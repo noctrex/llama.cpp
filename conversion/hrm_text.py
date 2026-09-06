@@ -19,15 +19,13 @@ class HrmTextModel(TextModel):
         super().__init__(*args, **kwargs)
 
         # training-style configs store the per-stack count in num_hidden_layers,
-        # transformers-style configs rewrite num_hidden_layers to the expanded
-        # cache-slot count and keep the real count in num_layers_per_stack
+        # transformers-style configs keep it in num_layers_per_stack
         self.layers_per_stack = self.hparams.get("num_layers_per_stack") or self.hparams["num_hidden_layers"]
         self.h_cycles = self.hparams["H_cycles"]
         self.l_cycles = self.hparams["L_cycles"]
 
-        # the runtime expands one H and one L stack over h_cycles * (l_cycles + 1)
-        # cache slots, so the GGUF block count is the slot count while the file
-        # only holds 2 * layers_per_stack physical blocks
+        # block_count is the expanded cache-slot count; the file only holds
+        # 2 * layers_per_stack physical blocks
         self.block_count = self.layers_per_stack * self.h_cycles * (self.l_cycles + 1)
         self.tensor_map = gguf.get_tensor_name_map(self.model_arch, 2 * self.layers_per_stack)
 
