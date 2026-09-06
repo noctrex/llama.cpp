@@ -122,8 +122,9 @@ ggml_tensor * llama_model_hrm_text::graph::build_stack(llm_graph_input_attn_kv *
                                  ext_factor, attn_factor, beta_fast, beta_slow);
             cb(Kcur, "Kcur", s);
 
-            cur = build_attn(inp_attn, nullptr, nullptr, nullptr, Qcur, Kcur, Vcur, nullptr, nullptr, nullptr, kq_scale,
-                             s);
+            cur = build_attn(inp_attn,
+                nullptr, nullptr, nullptr,
+                Qcur, Kcur, Vcur, nullptr, nullptr, nullptr, kq_scale, s);
             cb(cur, "attn_pregate", s);
 
             gate = ggml_sigmoid(ctx0, gate);
@@ -143,8 +144,12 @@ ggml_tensor * llama_model_hrm_text::graph::build_stack(llm_graph_input_attn_kv *
         cur   = build_norm(cur, nullptr, nullptr, LLM_NORM_RMS, s);
         cb(cur, "ffn_norm", s);
 
-        cur = build_ffn(cur, layer.ffn_up, nullptr, nullptr, layer.ffn_gate, nullptr, nullptr, layer.ffn_down, nullptr,
-                        nullptr, nullptr, LLM_FFN_SILU, LLM_FFN_PAR, s);
+        cur = build_ffn(cur,
+            layer.ffn_up, nullptr, nullptr,
+            layer.ffn_gate, nullptr, nullptr,
+            layer.ffn_down, nullptr, nullptr,
+            nullptr,
+            LLM_FFN_SILU, LLM_FFN_PAR, s);
         cb(cur, "ffn_out", s);
 
         cur = ggml_add(ctx0, cur, inpSA);
