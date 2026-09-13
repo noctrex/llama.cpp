@@ -128,7 +128,8 @@ static gguf_context_ptr get_gguf_ctx(const llm_arch arch, const bool moe) {
     } else if (arch == LLM_ARCH_CHAMELEON) {
         n_vocab = 10240;
     } else if (arch == LLM_ARCH_QWEN3TTS) {
-        n_vocab = 4096; // must be >= the hard-coded codec head size (3072)
+        //n_vocab = 4096; // must be >= the hard-coded codec head size (3072)
+        n_vocab = 3072; // TODO: should be 4096, but user code cannot get `n_vocab_out` yet [TAG_LLAMA_N_VOCAB_OUT]
     } else if (arch == LLM_ARCH_HRM_TEXT) {
         n_layer = 8; // 1 layer per stack x 2 h-cycles x (3 l-cycles + 1) cache slots
     }
